@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DECIMAL, Boolean
 from ..dependencies.database import Base
+from pydantic import BaseModel
 
 
 class MenuItem(Base):

@@ -1,21 +1,18 @@
 from pydantic import BaseModel
-
+from typing import Optional
 
 class OrderItemBase(BaseModel):
     order_id: int
     item_id: int
     quantity: int
-    subtotal: float
-
 
 class OrderItemCreate(OrderItemBase):
     pass
 
-
-class OrderItemUpdate(BaseModel):
+class OrderItemUpdate(OrderItemBase):
+    order_id: Optional[int] = None
+    item_id: Optional[int] = None
     quantity: Optional[int] = None
-    subtotal: Optional[float] = None
-
 
 class OrderItem(OrderItemBase):
     order_item_id: int

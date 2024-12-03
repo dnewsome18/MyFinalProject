@@ -10,3 +10,7 @@ class Analytic(Base):
     metric = Column(String(50), nullable=False)
     value = Column(DECIMAL(10, 2), nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False, default=datetime.now)
+
+
+#def analytics():
+   # return None

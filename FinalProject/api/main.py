@@ -2,11 +2,15 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import index as indexRoute
+from .routers import users
+from .routers import order_items
 from .models import model_loader
 from .dependencies.config import conf
 
 
 app = FastAPI()
+
+app.include_router(users.router)
 
 origins = ["*"]
 

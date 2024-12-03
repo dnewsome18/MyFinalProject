@@ -1,7 +1,7 @@
 from . import orders, order_details, recipes, sandwiches, resources, users, permissions, menu_items, order_items, \
-    feedback, promotions, analytics, system_docs
+   feedback, promotions, analytics, system_docs
 
-menu_items, order_items, feedback, promotions, analytics, system_docs
+#menu_items, order_items, feedback, promotions, analytics, system_docs
 
 from ..dependencies.database import engine
 
