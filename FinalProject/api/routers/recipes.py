@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..controllers import recipes as controller
 from ..schemas import recipes as schema
@@ -9,22 +9,31 @@ router = APIRouter(
     prefix="/recipes"
 )
 
-@router.post("/", response_model=schema.Recipe)
-def create(request: schema.RecipeCreate, db: Session = Depends(get_db)):
-    return controller.create(db=db, request=request)
+@router.post("/recipes/", response_model=schema.Recipe, tags=["Recipes"])
+def create_recipe(recipe: schema.RecipeCreate, db: Session = Depends(get_db)):
+    return controller.create(db=db, request=recipe)
 
-@router.get("/", response_model=list[schema.Recipe])
-def read_all(db: Session = Depends(get_db)):
+@router.get("/recipes/", response_model=list[schema.Recipe], tags=["Recipes"])
+def read_recipes(db: Session = Depends(get_db)):
     return controller.read_all(db)
 
-@router.get("/{recipe_id}", response_model=schema.Recipe)
-def read_one(recipe_id: int, db: Session = Depends(get_db)):
-    return controller.read_one(db, recipe_id=recipe_id)
+@router.get("/recipes/{recipe_id}", response_model=schema.Recipe, tags=["Recipes"])
+def read_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    recipe = controller.read_one(db, recipe_id=recipe_id)
+    if recipe is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return recipe
 
-@router.put("/{recipe_id}", response_model=schema.Recipe)
-def update(recipe_id: int, request: schema.RecipeUpdate, db: Session = Depends(get_db)):
-    return controller.update(db=db, request=request, recipe_id=recipe_id)
+@router.put("/recipes/{recipe_id}", response_model=schema.Recipe, tags=["Recipes"])
+def update_recipe(recipe_id: int, recipe: schema.RecipeUpdate, db: Session = Depends(get_db)):
+    db_recipe = controller.read_one(db, recipe_id=recipe_id)
+    if db_recipe is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return controller.update(db=db, recipe_id=recipe_id, request=recipe)
 
-@router.delete("/{recipe_id}")
-def delete(recipe_id: int, db: Session = Depends(get_db)):
+@router.delete("/recipes/{recipe_id}", tags=["Recipes"])
+def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    db_recipe = controller.read_one(db, recipe_id=recipe_id)
+    if db_recipe is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
     return controller.delete(db=db, recipe_id=recipe_id)

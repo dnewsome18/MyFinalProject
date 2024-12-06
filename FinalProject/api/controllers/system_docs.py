@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from ..models import SystemDoc
 from ..schemas import system_docs as schema
+from ..models import SystemDoc
 
 def create(db: Session, request: schema.SystemDocCreate):
     db_doc = SystemDoc(
-        name=request.name,
-        description=request.description,
+        title=request.title,
         content=request.content
     )
     db.add(db_doc)
@@ -14,23 +14,31 @@ def create(db: Session, request: schema.SystemDocCreate):
     return db_doc
 
 def read_all(db: Session):
-    return db.query(SystemDoc).all()
+    try:
+        print("Querying SystemDoc model...")
+        result = db.query(SystemDoc).all()
+        print(result)
+        return result
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
 
 def read_one(db: Session, doc_id: int):
-    return db.query(SystemDoc).filter(SystemDoc.id == doc_id).first()
+    return db.query(SystemDoc).filter(SystemDoc.doc_id == doc_id).first()
 
 def update(db: Session, request: schema.SystemDocUpdate, doc_id: int):
-    db_doc = db.query(SystemDoc).filter(SystemDoc.id == doc_id).first()
+    db_doc = db.query(SystemDoc).filter(SystemDoc.doc_id == doc_id).first()
     if db_doc:
-        db_doc.name = request.name
-        db_doc.description = request.description
-        db_doc.content = request.content
+        if request.title:
+            db_doc.title = request.title
+        if request.content:
+            db_doc.content = request.content
         db.commit()
         db.refresh(db_doc)
     return db_doc
 
 def delete(db: Session, doc_id: int):
-    db_doc = db.query(SystemDoc).filter(SystemDoc.id == doc_id).first()
+    db_doc = db.query(SystemDoc).filter(SystemDoc.doc_id == doc_id).first()
     if db_doc:
         db.delete(db_doc)
         db.commit()

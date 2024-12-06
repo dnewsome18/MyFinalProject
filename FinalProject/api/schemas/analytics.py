@@ -1,26 +1,29 @@
 from pydantic import BaseModel
-from datetime import datetime
+from decimal import Decimal
 from typing import Optional
+from datetime import datetime
 
 
+class Analytic(BaseModel):
+    metric: str
+    value: Decimal
 
-class AnalyticBase(BaseModel):
+class AnalyticCreate(BaseModel):
     metric: str
     value: float
-
-
-class AnalyticCreate(AnalyticBase):
-    pass
-
 
 class AnalyticUpdate(BaseModel):
     metric: Optional[str] = None
     value: Optional[float] = None
 
-
-class Analytic(AnalyticBase):
+class AnalyticBase(BaseModel):
     analytic_id: int
     timestamp: datetime
+
+    class AnalyticResponse(BaseModel):
+        id: int
+        name: str
+        value: float
 
     class Config:
         orm_mode = True

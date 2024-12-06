@@ -6,9 +6,8 @@ def create(db: Session, request: schema.PromotionCreate):
     db_promotion = Promotion(
         code=request.code,
         description=request.description,
-        discount=request.discount,
-        start_date=request.start_date,
-        end_date=request.end_date
+        discount_percent=request.discount_percent,
+        valid_until=request.valid_until
     )
     db.add(db_promotion)
     db.commit()
@@ -19,22 +18,25 @@ def read_all(db: Session):
     return db.query(Promotion).all()
 
 def read_one(db: Session, promo_id: int):
-    return db.query(Promotion).filter(Promotion.id == promo_id).first()
+    try:
+        promo_id = int(promo_id)
+    except ValueError:
+        return None
+    return db.query(Promotion).filter(Promotion.promo_id == promo_id).first()
 
 def update(db: Session, request: schema.PromotionUpdate, promo_id: int):
-    db_promotion = db.query(Promotion).filter(Promotion.id == promo_id).first()
+    db_promotion = db.query(Promotion).filter(Promotion.promo_id == promo_id).first()
     if db_promotion:
-        db_promotion.code = request.code
-        db_promotion.description = request.description
-        db_promotion.discount = request.discount
-        db_promotion.start_date = request.start_date
-        db_promotion.end_date = request.end_date
+        db_promotion.code = request.code or db_promotion.code
+        db_promotion.description = request.description or db_promotion.description
+        db_promotion.discount_percent = request.discount_percent or db_promotion.discount_percent
+        db_promotion.valid_until = request.valid_until or db_promotion.valid_until
         db.commit()
         db.refresh(db_promotion)
     return db_promotion
 
 def delete(db: Session, promo_id: int):
-    db_promotion = db.query(Promotion).filter(Promotion.id == promo_id).first()
+    db_promotion = db.query(Promotion).filter(Promotion.promo_id == promo_id).first()
     if db_promotion:
         db.delete(db_promotion)
         db.commit()

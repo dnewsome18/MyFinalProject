@@ -9,7 +9,6 @@ class PromotionBase(BaseModel):
     discount_percent: float
     valid_until: date
 
-
 class PromotionCreate(PromotionBase):
     pass
 

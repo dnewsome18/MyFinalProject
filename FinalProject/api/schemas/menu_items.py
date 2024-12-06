@@ -8,10 +8,8 @@ class MenuItemBase(BaseModel):
     price: float
     is_active: bool
 
-
 class MenuItemCreate(MenuItemBase):
     pass
-
 
 class MenuItemUpdate(BaseModel):
     name: Optional[str] = None
@@ -21,7 +19,7 @@ class MenuItemUpdate(BaseModel):
 
 
 class MenuItem(MenuItemBase):
-    item_id: int
+    id: int
 
     class Config:
         orm_mode = True

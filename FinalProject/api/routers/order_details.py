@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, FastAPI, status, Response
+from fastapi import APIRouter, Depends, FastAPI, status, Response, HTTPException
 from sqlalchemy.orm import Session
 from ..controllers import order_details as controller
 from ..schemas import order_details as schema
@@ -9,27 +9,31 @@ router = APIRouter(
     prefix="/orderdetails"
 )
 
+@router.post("/order-details/", response_model=schema.OrderDetail, tags=["Order Details"])
+def create_order_detail(detail: schema.OrderDetailCreate, db: Session = Depends(get_db)):
+    return controller.create(db=db, request=detail)
 
-@router.post("/", response_model=schema.OrderDetail)
-def create(request: schema.OrderDetailCreate, db: Session = Depends(get_db)):
-    return controller.create(db=db, request=request)
-
-
-@router.get("/", response_model=list[schema.OrderDetail])
-def read_all(db: Session = Depends(get_db)):
+@router.get("/order-details/", response_model=list[schema.OrderDetail], tags=["Order Details"])
+def read_order_details(db: Session = Depends(get_db)):
     return controller.read_all(db)
 
+@router.get("/order-details/{item_id}", response_model=schema.OrderDetail, tags=["Order Details"])
+def read_order_detail(item_id: int, db: Session = Depends(get_db)):
+    detail = controller.read_one(db, item_id=item_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="Order detail not found")
+    return detail
 
-@router.get("/{item_id}", response_model=schema.OrderDetail)
-def read_one(item_id: int, db: Session = Depends(get_db)):
-    return controller.read_one(db, item_id=item_id)
+@router.put("/order-details/{item_id}", response_model=schema.OrderDetail, tags=["Order Details"])
+def update_order_detail(item_id: int, detail: schema.OrderDetailUpdate, db: Session = Depends(get_db)):
+    db_detail = controller.read_one(db, item_id=item_id)
+    if db_detail is None:
+        raise HTTPException(status_code=404, detail="Order detail not found")
+    return controller.update(db=db, item_id=item_id, request=detail)
 
-
-@router.put("/{item_id}", response_model=schema.OrderDetail)
-def update(item_id: int, request: schema.OrderDetailUpdate, db: Session = Depends(get_db)):
-    return controller.update(db=db, request=request, item_id=item_id)
-
-
-@router.delete("/{item_id}")
-def delete(item_id: int, db: Session = Depends(get_db)):
+@router.delete("/order-details/{item_id}", tags=["Order Details"])
+def delete_order_detail(item_id: int, db: Session = Depends(get_db)):
+    db_detail = controller.read_one(db, item_id=item_id)
+    if db_detail is None:
+        raise HTTPException(status_code=404, detail="Order detail not found")
     return controller.delete(db=db, item_id=item_id)

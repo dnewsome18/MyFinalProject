@@ -2,10 +2,12 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DECIMAL, DATETIME
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..dependencies.database import Base
+from sqlalchemy import Table, MetaData
 
 
 class Order(Base):
     __tablename__ = "orders"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     customer_name = Column(String(100))
@@ -13,3 +15,4 @@ class Order(Base):
     description = Column(String(300))
 
     order_details = relationship("OrderDetail", back_populates="order")
+    order_items = relationship("OrderItem", back_populates="order")

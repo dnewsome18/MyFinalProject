@@ -1,8 +1,20 @@
 from sqlalchemy.orm import Session
 from ..models import Recipe
 from ..schemas import recipes as schema
+from ..models.sandwiches import Sandwich
+from fastapi import HTTPException
+from ..models.resources import Resource
 
 def create(db: Session, request: schema.RecipeCreate):
+    sandwich = db.query(Sandwich).filter(Sandwich.id == request.sandwich_id).first()
+    if not sandwich:
+        print(f"Sandwich with id {request.sandwich_id} not found.")
+        raise HTTPException(status_code=404, detail="Sandwich not found")
+
+    resource = db.query(Resource).filter(Resource.id == request.resource_id).first()
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+
     db_recipe = Recipe(
         sandwich_id=request.sandwich_id,
         resource_id=request.resource_id,

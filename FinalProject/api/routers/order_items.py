@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..controllers import order_items as controller
 from ..schemas import order_items as schema
@@ -9,22 +9,31 @@ router = APIRouter(
     prefix="/order-items"
 )
 
-@router.post("/", response_model=schema.OrderItem)
-def create_order_item(request: schema.OrderItemCreate, db: Session = Depends(get_db)):
-    return controller.create(db=db, request=request)
+@router.post("/order-items/", response_model=schema.OrderItem, tags=["Order Items"])
+def create_order_item(item: schema.OrderItemCreate, db: Session = Depends(get_db)):
+    return controller.create(db=db, request=item)
 
-@router.get("/", response_model=list[schema.OrderItem])
-def read_all_order_items(db: Session = Depends(get_db)):
+@router.get("/order-items/", response_model=list[schema.OrderItem], tags=["Order Items"])
+def read_order_items(db: Session = Depends(get_db)):
     return controller.read_all(db)
 
-@router.get("/{order_item_id}", response_model=schema.OrderItem)
+@router.get("/order-items/{order_item_id}", response_model=schema.OrderItem, tags=["Order Items"])
 def read_order_item(order_item_id: int, db: Session = Depends(get_db)):
-    return controller.read_one(db, order_item_id=order_item_id)
+    item = controller.read_one(db, order_item_id=order_item_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Order item not found")
+    return item
 
-@router.put("/{order_item_id}", response_model=schema.OrderItem)
-def update_order_item(order_item_id: int, request: schema.OrderItemUpdate, db: Session = Depends(get_db)):
-    return controller.update(db=db, request=request, order_item_id=order_item_id)
+@router.put("/order-items/{order_item_id}", response_model=schema.OrderItem, tags=["Order Items"])
+def update_order_item(order_item_id: int, item: schema.OrderItemUpdate, db: Session = Depends(get_db)):
+    db_item = controller.read_one(db, order_item_id=order_item_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Order item not found")
+    return controller.update(db=db, order_item_id=order_item_id, request=item)
 
-@router.delete("/{order_item_id}")
+@router.delete("/order-items/{order_item_id}", tags=["Order Items"])
 def delete_order_item(order_item_id: int, db: Session = Depends(get_db)):
+    db_item = controller.read_one(db, order_item_id=order_item_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Order item not found")
     return controller.delete(db=db, order_item_id=order_item_id)

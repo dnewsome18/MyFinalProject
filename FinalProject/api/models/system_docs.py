@@ -3,6 +3,7 @@ from datetime import datetime
 from ..dependencies.database import Base
 
 
+
 class SystemDoc(Base):
     __tablename__ = "system_docs"
 

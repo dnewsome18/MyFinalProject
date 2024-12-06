@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..controllers import menu_items as controller
 from ..schemas import menu_items as schema
@@ -9,22 +9,31 @@ router = APIRouter(
     prefix="/menuitems"
 )
 
-@router.post("/", response_model=schema.MenuItem)
-def create(request: schema.MenuItemCreate, db: Session = Depends(get_db)):
-    return controller.create(db=db, request=request)
+@router.post("/menu-items/", response_model=schema.MenuItem, tags=["Menu Items"])
+def create_menu_item(item: schema.MenuItemCreate, db: Session = Depends(get_db)):
+    return controller.create(db=db, request=item)
 
-@router.get("/", response_model=list[schema.MenuItem])
-def read_all(db: Session = Depends(get_db)):
+@router.get("/menu-items/", response_model=list[schema.MenuItem], tags=["Menu Items"])
+def read_menu_items(db: Session = Depends(get_db)):
     return controller.read_all(db)
 
-@router.get("/{item_id}", response_model=schema.MenuItem)
-def read_one(item_id: int, db: Session = Depends(get_db)):
-    return controller.read_one(db, item_id=item_id)
+@router.get("/menu-items/{item_id}", response_model=schema.MenuItem, tags=["Menu Items"])
+def read_menu_item(item_id: int, db: Session = Depends(get_db)):
+    item = controller.read_one(db, item_id=item_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Menu item not found")
+    return item
 
-@router.put("/{item_id}", response_model=schema.MenuItem)
-def update(item_id: int, request: schema.MenuItemUpdate, db: Session = Depends(get_db)):
-    return controller.update(db=db, request=request, item_id=item_id)
+@router.put("/menu-items/{item_id}", response_model=schema.MenuItem, tags=["Menu Items"])
+def update_menu_item(item_id: int, item: schema.MenuItemUpdate, db: Session = Depends(get_db)):
+    db_item = controller.read_one(db, item_id=item_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Menu item not found")
+    return controller.update(db=db, request=item, item_id=item_id)
 
-@router.delete("/{item_id}")
-def delete(item_id: int, db: Session = Depends(get_db)):
+@router.delete("/menu-items/{item_id}", tags=["Menu Items"])
+def delete_menu_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = controller.read_one(db, item_id=item_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Menu item not found")
     return controller.delete(db=db, item_id=item_id)

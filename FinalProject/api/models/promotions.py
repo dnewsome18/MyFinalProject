@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DECIMAL, Date
 from ..dependencies.database import Base
+from sqlalchemy.ext.declarative import declarative_base
 
 
 class Promotion(Base):

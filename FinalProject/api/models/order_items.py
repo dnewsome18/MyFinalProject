@@ -6,10 +6,11 @@ from ..dependencies.database import Base
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    order_item_id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.order_id"))
-    item_id = Column(Integer, ForeignKey("menu_items.item_id"))
+    id = Column(Integer, primary_key=True)
+    menu_item_id = Column(Integer, ForeignKey('menu_items.id'))
+    order_id = Column(Integer, ForeignKey("orders.id"))
+    item_id = Column(Integer, ForeignKey("items.id"))
     quantity = Column(Integer)
 
+    menu_item = relationship("MenuItem", back_populates="order_items")
     order = relationship("Order", back_populates="order_items")
-    item = relationship("MenuItem", back_populates="order_items")
